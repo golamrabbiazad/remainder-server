@@ -1,0 +1,19 @@
+{
+  "name": "remainder-server",
+  "version": "1.0.0",
+  "description": "Simple Reminder App",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sequelize": "^6.30.0",
+    "sqlite3": "^5.1.6"
+  },
+  "keywords": [],
+  "author": "golamrabbiazad",
+  "license": "MIT",
+  "type": "module"
+}
