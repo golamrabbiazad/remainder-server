@@ -1,6 +1,6 @@
 import express from "express";
-import { Reminder, sequelize } from "./models/reminder.js";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
+import { Reminder, sequelize } from "./models/reminder";
 
 const app = express();
 
@@ -15,24 +15,30 @@ app.post("/reminders", async (req, res) => {
   res.status(201).json(reminder);
 });
 
+interface WhereType {
+  user: string;
+  date: {
+    [x: string]: Date;
+  };
+}
+
 // Get all reminders
 app.get("/reminders", async (req, res) => {
   res.set("Access-Control-Allow-Origin", `${process.env.CLIENT_URL}`);
   const { user, after } = req.query;
-  const where = {};
 
-  if (user) {
-    where.user = user;
+  if (typeof user === "string" && typeof after === "string") {
+    const where: WhereOptions<WhereType> = {};
+
+    if (user && after) {
+      where.user = user;
+      where.date = {
+        [Op.gte]: new Date(Number(after)),
+      };
+    }
+    const reminders = await Reminder.findAll({ where, order: [["id", "ASC"]] });
+    res.status(200).json(reminders);
   }
-
-  if (after) {
-    where.date = {
-      [Op.gte]: new Date(Number(after)),
-    };
-  }
-
-  const reminders = await Reminder.findAll({ where, order: [["id", "ASC"]] });
-  res.status(200).json(reminders);
 });
 
 // Get a single reminder
@@ -40,8 +46,9 @@ app.get("/reminders/:id", async (req, res) => {
   const { id } = req.params;
 
   const reminder = await Reminder.findByPk(id);
+
   if (!reminder) {
-    return res.status(404).send("ID not found");
+    res.status(404).send("ID not found");
   }
 
   res.status(200).json(reminder);
@@ -83,3 +90,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
+export default app;
